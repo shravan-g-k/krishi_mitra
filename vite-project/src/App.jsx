@@ -142,14 +142,45 @@ export default function KrishiMitra() {
   const [isWeatherLoading, setIsWeatherLoading] = useState(true);
 
   useEffect(() => {
+    const getUserLocation = () => {
+      return new Promise((resolve, reject) => {
+        if (!navigator.geolocation) {
+          reject(new Error('Geolocation is not supported by this browser'));
+          return;
+        }
+
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            resolve({
+              lat: position.coords.latitude,
+              lon: position.coords.longitude
+            });
+          },
+          (error) => {
+            reject(new Error(`Location access denied: ${error.message}`));
+          },
+          {
+            enableHighAccuracy: true,
+            timeout: 10000,
+            maximumAge: 300000 // 5 minutes
+          }
+        );
+      });
+    };
+
     const fetchWeatherData = async () => {
       const API_KEY = WEATHER_API;
-      const LAT = 12.8855;
-      const LON = 74.8388;
 
       try {
+        // Get user's current location
+        console.log('Requesting location permission...');
+        const location = await getUserLocation();
+        console.log('Location obtained:', location);
+
+        const { lat, lon } = location;
+
         // Get current weather
-        const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${LAT}&lon=${LON}&appid=${API_KEY}&units=metric`);
+        const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=metric`);
 
         if (!response.ok) {
           throw new Error(`Weather API error: ${response.status} ${response.statusText}`);
@@ -158,8 +189,7 @@ export default function KrishiMitra() {
         const currentData = await response.json();
 
         // Get 5-day forecast
-        const forecastResponse = await fetch(`https://api.openweathermap.org/data/2.5/forecast?lat=${LAT}&lon=${LON}&appid=${API_KEY}&units=metric`);
-
+        const forecastResponse = await fetch(`https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=metric`);
 
         if (!forecastResponse.ok) {
           throw new Error(`Forecast API error: ${forecastResponse.status} ${forecastResponse.statusText}`);
@@ -169,10 +199,26 @@ export default function KrishiMitra() {
 
         const getIcon = (weather) => {
           switch (weather.toLowerCase()) {
-            case 'clear': return Sun;
-            case 'rain': return CloudRain;
-            case 'clouds': return Cloud;
-            default: return Sun;
+            case 'clear':
+            case 'sunny':
+              return Sun;
+            case 'rain':
+            case 'drizzle':
+            case 'shower':
+            case 'thunderstorm':
+              return CloudRain;
+            case 'clouds':
+            case 'cloudy':
+            case 'overcast':
+            case 'mist':
+            case 'fog':
+            case 'haze':
+              return Cloud;
+            case 'snow':
+            case 'sleet':
+              return Cloud; // Using Cloud for snow since no snow icon available
+            default:
+              return Sun;
           }
         };
 
@@ -198,7 +244,7 @@ export default function KrishiMitra() {
           }
         }
 
-        console.log(currentData.main.temp);
+        console.log('Weather data for location:', currentData.name);
         setWeatherData({
           today: {
             temp: Math.round(currentData.main.temp),
@@ -206,12 +252,12 @@ export default function KrishiMitra() {
             icon: getIcon(currentData.weather[0].main)
           },
           forecast: dailyForecasts,
-          weekly: `${currentData.weather[0].description}. Humidity: ${currentData.main.humidity}%. Location: ${forecastData.city.name}`
+          weekly: `${currentData.weather[0].description}. Humidity: ${currentData.main.humidity}%. Location: ${currentData.name}`
         });
       } catch (error) {
         console.error('Weather API error:', error);
-        console.log('Using default weather data due to API error');
-        // Keep default data on error
+        console.log('Using default weather data due to error:', error.message);
+        // Keep default data on error - could be location denied or API error
       } finally {
         setIsWeatherLoading(false);
       }
@@ -314,9 +360,9 @@ export default function KrishiMitra() {
                   <p className="text-lg opacity-90">{t.monday}</p>
                 </div>
                 <div className="text-right">
-                  <Sun className="w-16 h-16 mb-2 ml-auto" />
+                  {React.createElement(weatherData.today.icon, { className: "w-16 h-16 mb-2 ml-auto" })}
                   <p className="text-3xl font-bold">{weatherData.today.temp}°C</p>
-                  <p className="opacity-90">{t.sunny}</p>
+                  <p className="opacity-90">{weatherData.today.condition}</p>
                 </div>
               </div>
             )}
