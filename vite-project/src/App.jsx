@@ -130,15 +130,36 @@ export default function KrishiMitra() {
   const t = translations[language];
 
   //replace with actual weather data from API
-  const weatherData = {
-    today: { temp: 28, condition: 'Sunny', icon: Sun },
-    forecast: [
-      { day: 'Tue', temp: 30, icon: Sun },
-      { day: 'Wed', temp: 26, icon: CloudRain },
-      { day: 'Thu', temp: 27, icon: Cloud }
-    ],
-    weekly: 'Moderate rainfall expected mid-week. Good for irrigation.'
-  };
+  const weatherData = await (async () => {
+    const API_KEY = 'YOUR_API_KEY'; // Replace with your OpenWeatherMap API key
+    const CITY = 'Delhi'; // Change to your city
+    
+    try {
+      const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${CITY}&appid=${API_KEY}&units=metric`);
+      const data = await response.json();
+      const forecastResponse = await fetch(`https://api.openweathermap.org/data/2.5/forecast?q=${CITY}&appid=${API_KEY}&units=metric`);
+      const forecastData = await forecastResponse.json();
+      
+      const getIcon = (weather) => weather === 'Clear' ? Sun : weather === 'Rain' ? CloudRain : Cloud;
+      const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+      
+      return {
+        today: { temp: Math.round(data.main.temp), condition: data.weather[0].main, icon: getIcon(data.weather[0].main) },
+        forecast: [8,16,24].map(i => ({ day: days[new Date(forecastData.list[i].dt*1000).getDay()], temp: Math.round(forecastData.list[i].main.temp), icon: getIcon(forecastData.list[i].weather[0].main) })),
+        weekly: `${data.weather[0].description}. Humidity: ${data.main.humidity}%`
+      };
+    } catch (error) {
+      return {
+        today: { temp: 28, condition: 'Sunny', icon: Sun },
+        forecast: [
+          { day: 'Tue', temp: 30, icon: Sun },
+          { day: 'Wed', temp: 26, icon: CloudRain },
+          { day: 'Thu', temp: 27, icon: Cloud }
+        ],
+        weekly: 'Moderate rainfall expected mid-week. Good for irrigation.'
+      };
+    }
+  })();
 
   const farmerData = {
     landArea: '2.5 Acres',
