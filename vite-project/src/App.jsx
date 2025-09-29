@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Cloud, Sun, CloudRain, Wind, Upload, Camera, Send, Mic, Globe, Leaf, TrendingUp, Calendar, MapPin } from 'lucide-react';
-
+import { WEATHER_API } from './secret';
 export default function KrishiMitra() {
   const [language, setLanguage] = useState('English');
   const [chatMessages, setChatMessages] = useState([
@@ -130,36 +130,93 @@ export default function KrishiMitra() {
   const t = translations[language];
 
   //replace with actual weather data from API
-  const weatherData = await (async () => {
-    const API_KEY = 'YOUR_API_KEY'; // Replace with your OpenWeatherMap API key
-    const CITY = 'Delhi'; // Change to your city
-    
-    try {
-      const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${CITY}&appid=${API_KEY}&units=metric`);
-      const data = await response.json();
-      const forecastResponse = await fetch(`https://api.openweathermap.org/data/2.5/forecast?q=${CITY}&appid=${API_KEY}&units=metric`);
-      const forecastData = await forecastResponse.json();
+  const [weatherData, setWeatherData] = useState({
+    today: { temp: 28, condition: 'Sunny', icon: Sun },
+    forecast: [
+      { day: 'Tue', temp: 30, icon: Sun },
+      { day: 'Wed', temp: 26, icon: CloudRain },
+      { day: 'Thu', temp: 27, icon: Cloud }
+    ],
+    weekly: 'Moderate rainfall expected mid-week. Good for irrigation.'
+  });
+  const [isWeatherLoading, setIsWeatherLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchWeatherData = async () => {
+      const API_KEY = WEATHER_API;
+      const LAT = 12.8855;
+      const LON = 74.8388;
       
-      const getIcon = (weather) => weather === 'Clear' ? Sun : weather === 'Rain' ? CloudRain : Cloud;
-      const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-      
-      return {
-        today: { temp: Math.round(data.main.temp), condition: data.weather[0].main, icon: getIcon(data.weather[0].main) },
-        forecast: [8,16,24].map(i => ({ day: days[new Date(forecastData.list[i].dt*1000).getDay()], temp: Math.round(forecastData.list[i].main.temp), icon: getIcon(forecastData.list[i].weather[0].main) })),
-        weekly: `${data.weather[0].description}. Humidity: ${data.main.humidity}%`
-      };
-    } catch (error) {
-      return {
-        today: { temp: 28, condition: 'Sunny', icon: Sun },
-        forecast: [
-          { day: 'Tue', temp: 30, icon: Sun },
-          { day: 'Wed', temp: 26, icon: CloudRain },
-          { day: 'Thu', temp: 27, icon: Cloud }
-        ],
-        weekly: 'Moderate rainfall expected mid-week. Good for irrigation.'
-      };
-    }
-  })();
+      try {
+        // Get current weather
+        const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${LAT}&lon=${LON}&appid=${API_KEY}&units=metric`);
+        
+        if (!response.ok) {
+          throw new Error(`Weather API error: ${response.status} ${response.statusText}`);
+        }
+        
+        const currentData = await response.json();
+        
+        // Get 5-day forecast
+        const forecastResponse = await fetch(`https://api.openweathermap.org/data/2.5/forecast?lat=${LAT}&lon=${LON}&appid=${API_KEY}&units=metric`);
+        
+        if (!forecastResponse.ok) {
+          throw new Error(`Forecast API error: ${forecastResponse.status} ${forecastResponse.statusText}`);
+        }
+        
+        const forecastData = await forecastResponse.json();
+        
+        const getIcon = (weather) => {
+          switch(weather.toLowerCase()) {
+            case 'clear': return Sun;
+            case 'rain': return CloudRain;
+            case 'clouds': return Cloud;
+            default: return Sun;
+          }
+        };
+        
+        const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+
+        // Get next 3 days forecast (skip today, get next 3 unique days)
+        const dailyForecasts = [];
+        const processedDates = new Set();
+        
+        for (let i = 0; i < forecastData.list.length && dailyForecasts.length < 3; i++) {
+          const forecast = forecastData.list[i];
+          const date = new Date(forecast.dt * 1000);
+          const dateKey = date.toDateString();
+          
+          // Skip if we already processed this date, and skip today
+          if (!processedDates.has(dateKey) && date.getDate() !== new Date().getDate()) {
+            processedDates.add(dateKey);
+            dailyForecasts.push({
+              day: days[date.getDay()],
+              temp: Math.round(forecast.main.temp),
+              icon: getIcon(forecast.weather[0].main)
+            });
+          }
+        }
+
+        setWeatherData({
+          today: { 
+            temp: Math.round(currentData.main.temp), 
+            condition: currentData.weather[0].main, 
+            icon: getIcon(currentData.weather[0].main) 
+          },
+          forecast: dailyForecasts,
+          weekly: `${currentData.weather[0].description}. Humidity: ${currentData.main.humidity}%. Location: ${forecastData.city.name}`
+        });
+      } catch (error) {
+        console.error('Weather API error:', error);
+        console.log('Using default weather data due to API error');
+        // Keep default data on error
+      } finally {
+        setIsWeatherLoading(false);
+      }
+    };
+
+    fetchWeatherData();
+  }, []);
 
   const farmerData = {
     landArea: '2.5 Acres',
@@ -241,30 +298,49 @@ export default function KrishiMitra() {
           </div>
 
           <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-2xl p-5 mb-4">
-            <div className="flex justify-between items-center">
-              <div>
-                <p className="text-3xl font-bold">29 September 2025</p>
-                <p className="text-lg opacity-90">{t.monday}</p>
+            {isWeatherLoading ? (
+              <div className="flex flex-col items-center justify-center py-8">
+                <div className="w-full bg-blue-400 rounded-full h-2 mb-4">
+                  <div className="bg-white h-2 rounded-full animate-pulse" style={{width: '60%'}}></div>
+                </div>
+                <p className="text-lg opacity-90">Loading weather data...</p>
               </div>
-              <div className="text-right">
-                <Sun className="w-16 h-16 mb-2 ml-auto" />
-                <p className="text-3xl font-bold">{weatherData.today.temp}°C</p>
-                <p className="opacity-90">{t.sunny}</p>
+            ) : (
+              <div className="flex justify-between items-center">
+                <div>
+                  <p className="text-3xl font-bold">29 September 2025</p>
+                  <p className="text-lg opacity-90">{t.monday}</p>
+                </div>
+                <div className="text-right">
+                  <Sun className="w-16 h-16 mb-2 ml-auto" />
+                  <p className="text-3xl font-bold">{weatherData.today.temp}°C</p>
+                  <p className="opacity-90">{t.sunny}</p>
+                </div>
               </div>
-            </div>
+            )}
           </div>
 
           <div className="grid grid-cols-3 gap-3 mb-4">
-            {weatherData.forecast.map((day, idx) => {
-              const Icon = day.icon;
-              return (
+            {isWeatherLoading ? (
+              Array.from({length: 3}).map((_, idx) => (
                 <div key={idx} className="bg-blue-50 rounded-xl p-3 text-center">
-                  <p className="font-semibold text-gray-700">{day.day}</p>
-                  <Icon className="w-8 h-8 mx-auto my-2 text-blue-600" />
-                  <p className="font-bold text-gray-800">{day.temp}°C</p>
+                  <div className="h-4 bg-gray-300 rounded mb-2 animate-pulse"></div>
+                  <div className="w-8 h-8 bg-gray-300 rounded-full mx-auto my-2 animate-pulse"></div>
+                  <div className="h-4 bg-gray-300 rounded animate-pulse"></div>
                 </div>
-              );
-            })}
+              ))
+            ) : (
+              weatherData.forecast.map((day, idx) => {
+                const Icon = day.icon;
+                return (
+                  <div key={idx} className="bg-blue-50 rounded-xl p-3 text-center">
+                    <p className="font-semibold text-gray-700">{day.day}</p>
+                    <Icon className="w-8 h-8 mx-auto my-2 text-blue-600" />
+                    <p className="font-bold text-gray-800">{day.temp}°C</p>
+                  </div>
+                );
+              })
+            )}
           </div>
 
           <div className="bg-green-50 rounded-xl p-4 border border-green-200">
