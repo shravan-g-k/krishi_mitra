@@ -146,46 +146,47 @@ export default function KrishiMitra() {
       const API_KEY = WEATHER_API;
       const LAT = 12.8855;
       const LON = 74.8388;
-      
+
       try {
         // Get current weather
         const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${LAT}&lon=${LON}&appid=${API_KEY}&units=metric`);
-        
+
         if (!response.ok) {
           throw new Error(`Weather API error: ${response.status} ${response.statusText}`);
         }
-        
+
         const currentData = await response.json();
-        
+
         // Get 5-day forecast
         const forecastResponse = await fetch(`https://api.openweathermap.org/data/2.5/forecast?lat=${LAT}&lon=${LON}&appid=${API_KEY}&units=metric`);
-        
+
+
         if (!forecastResponse.ok) {
           throw new Error(`Forecast API error: ${forecastResponse.status} ${forecastResponse.statusText}`);
         }
-        
+
         const forecastData = await forecastResponse.json();
-        
+
         const getIcon = (weather) => {
-          switch(weather.toLowerCase()) {
+          switch (weather.toLowerCase()) {
             case 'clear': return Sun;
             case 'rain': return CloudRain;
             case 'clouds': return Cloud;
             default: return Sun;
           }
         };
-        
-        const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+
+        const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
         // Get next 3 days forecast (skip today, get next 3 unique days)
         const dailyForecasts = [];
         const processedDates = new Set();
-        
+
         for (let i = 0; i < forecastData.list.length && dailyForecasts.length < 3; i++) {
           const forecast = forecastData.list[i];
           const date = new Date(forecast.dt * 1000);
           const dateKey = date.toDateString();
-          
+
           // Skip if we already processed this date, and skip today
           if (!processedDates.has(dateKey) && date.getDate() !== new Date().getDate()) {
             processedDates.add(dateKey);
@@ -197,11 +198,12 @@ export default function KrishiMitra() {
           }
         }
 
+        console.log(currentData.main.temp);
         setWeatherData({
-          today: { 
-            temp: Math.round(currentData.main.temp), 
-            condition: currentData.weather[0].main, 
-            icon: getIcon(currentData.weather[0].main) 
+          today: {
+            temp: Math.round(currentData.main.temp),
+            condition: currentData.weather[0].main,
+            icon: getIcon(currentData.weather[0].main)
           },
           forecast: dailyForecasts,
           weekly: `${currentData.weather[0].description}. Humidity: ${currentData.main.humidity}%. Location: ${forecastData.city.name}`
@@ -301,14 +303,14 @@ export default function KrishiMitra() {
             {isWeatherLoading ? (
               <div className="flex flex-col items-center justify-center py-8">
                 <div className="w-full bg-blue-400 rounded-full h-2 mb-4">
-                  <div className="bg-white h-2 rounded-full animate-pulse" style={{width: '60%'}}></div>
+                  <div className="bg-white h-2 rounded-full animate-pulse" style={{ width: '60%' }}></div>
                 </div>
                 <p className="text-lg opacity-90">Loading weather data...</p>
               </div>
             ) : (
               <div className="flex justify-between items-center">
                 <div>
-                  <p className="text-3xl font-bold">29 September 2025</p>
+                  <p className="text-3xl font-bold">{new Date().toLocaleDateString(language === 'English' ? 'en-IN' : language === 'हिन्दी' ? 'hi-IN' : language === 'ಕನ್ನಡ' ? 'kn-IN' : 'mr-IN', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
                   <p className="text-lg opacity-90">{t.monday}</p>
                 </div>
                 <div className="text-right">
@@ -322,7 +324,7 @@ export default function KrishiMitra() {
 
           <div className="grid grid-cols-3 gap-3 mb-4">
             {isWeatherLoading ? (
-              Array.from({length: 3}).map((_, idx) => (
+              Array.from({ length: 3 }).map((_, idx) => (
                 <div key={idx} className="bg-blue-50 rounded-xl p-3 text-center">
                   <div className="h-4 bg-gray-300 rounded mb-2 animate-pulse"></div>
                   <div className="w-8 h-8 bg-gray-300 rounded-full mx-auto my-2 animate-pulse"></div>
