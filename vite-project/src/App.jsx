@@ -1,133 +1,146 @@
+import React, { useState } from 'react';
+import { Cloud, Sun, CloudRain, Wind, Send, Mic, Globe, Leaf, Calendar, MapPin } from 'lucide-react';
+import FarmerDetailsCard from './FarmerDetailsCard';
+import ImageUploadCard from './ImageUploadCard';
+
 import React, { useState, useEffect } from 'react';
 import { Cloud, Sun, CloudRain, Wind, Upload, Camera, Send, Mic, Globe, Leaf, TrendingUp, Calendar, MapPin } from 'lucide-react';
 import { WEATHER_API } from './secret';
 export default function KrishiMitra() {
-  const [language, setLanguage] = useState('English');
+  const [language, setLanguage] 
+  useState('English');
   const [chatMessages, setChatMessages] = useState([
     { type: 'bot', text: 'Hello! How can I help you today?' }
   ]);
   const [inputMessage, setInputMessage] = useState('');
   const [uploadedImage, setUploadedImage] = useState(null);
   const [showLangDropdown, setShowLangDropdown] = useState(false);
-
+  const [analyzing, setAnalyzing] = useState(false);
   const languages = ['English', 'हिन्दी', 'ಕನ್ನಡ', 'मराठी'];
-
+    
+  // Add translations object
   const translations = {
-    English: {
-      title: 'Krishi Mitra',
-      dateWeather: "Today's Date & Weather",
+    'English': {
+      title: 'KrishiMitra',
+      botWelcome: 'Hello! How can I help you today?',
+      botResponse: 'I can help you with farming advice!',
+      dateWeather: 'Date & Weather',
       monday: 'Monday',
       sunny: 'Sunny',
-      weeklyForecast: 'Weekly Forecast:',
+      weeklyForecast: 'Weekly Forecast',
+      uploadImage: 'Upload Image',
+      uploadPrompt: 'Upload a photo',
+      askAI: 'Ask AI Assistant',
+      typePlaceholder: 'Type your message...',
       farmerDetails: 'Farmer Details',
       landArea: 'Land Area',
-      crop: 'Crop',
+      crop: 'Crop Type',
       growthStage: 'Growth Stage',
       marketPrice: 'Market Price',
       estimatedYield: 'Estimated Yield',
-      harvestIn: 'Harvest In',
-      uploadImage: 'Upload Plant/Soil Image',
-      remove: 'Remove',
-      analysisResults: 'Analysis Results:',
-      cropHealthy: '✓ Crop appears healthy',
-      noPest: '✓ No pest disease detected',
-      nitrogen: '⚠ Slight nitrogen deficiency - Urea fertilizer recommended',
-      chooseGallery: 'Choose from Gallery',
-      takePhoto: 'Take Photo',
-      askAI: 'Ask AI Assistant',
-      typePlaceholder: 'Type your question...',
-      botWelcome: 'Hello! How can I help you today?',
-      botResponse: 'Your rice crop looks healthy. Water regularly and monitor for pests.',
-      cropName: 'Rice (Paddy)',
-      stageName: 'Flowering Stage'
+      harvestTime: 'Harvest Time',
+      healthStatus: 'Health Status',
+      recommendations: 'Recommendations',
+      analysisResults: 'Analysis Results',
+      analyzingCrop: 'Analyzing crop data...',
+      pleaseWait: 'Please wait while we process your image',
+      noData: 'No Data Available',
+      uploadPromptDetails: 'Upload and analyze an image to see crop details',
+      analysisIssue: 'Analysis Issue',
+      aiPowered: 'Analysis powered by AI • Results are estimates'
     },
-    हिन्दी: {
+    'हिन्दी': {
       title: 'कृषि मित्र',
+      botWelcome: 'नमस्ते! मैं आपकी कैसे मदद कर सकता हूँ?',
+      botResponse: 'आपके धान की फसल स्वस्थ दिख रही है। नियमित रूप से पानी दें और कीटों पर नज़र रखें।',
       dateWeather: 'आज की तारीख और मौसम',
       monday: 'सोमवार',
       sunny: 'धूप',
-      weeklyForecast: 'साप्ताहिक पूर्वानुमान:',
+      weeklyForecast: 'साप्ताहिक पूर्वानुमान',
+      uploadImage: 'पौधे/मिट्टी की तस्वीर अपलोड करें',
+      uploadPrompt: 'फोटो अपलोड करें',
+      askAI: 'AI सहायक से पूछें',
+      typePlaceholder: 'अपना सवाल टाइप करें...',
       farmerDetails: 'किसान का विवरण',
       landArea: 'भूमि क्षेत्र',
-      crop: 'फसल',
+      crop: 'फसल का प्रकार',
       growthStage: 'वृद्धि चरण',
       marketPrice: 'बाज़ार मूल्य',
       estimatedYield: 'अनुमानित उपज',
-      harvestIn: 'कटाई तक',
-      uploadImage: 'पौधे/मिट्टी की तस्वीर अपलोड करें',
-      remove: 'हटाएं',
-      analysisResults: 'विश्लेषण परिणाम:',
-      cropHealthy: '✓ फसल स्वस्थ दिख रही है',
-      noPest: '✓ कोई कीट रोग नहीं पाया गया',
-      nitrogen: '⚠ नाइट्रोजन की थोड़ी कमी - यूरिया खाद की सिफारिश',
-      chooseGallery: 'गैलरी से चुनें',
-      takePhoto: 'फोटो लें',
-      askAI: 'AI सहायक से पूछें',
-      typePlaceholder: 'अपना सवाल टाइप करें...',
-      botWelcome: 'नमस्ते! मैं आपकी कैसे मदद कर सकता हूँ?',
-      botResponse: 'आपके धान की फसल स्वस्थ दिख रही है। नियमित रूप से पानी दें और कीटों पर नज़र रखें।',
-      cropName: 'धान',
-      stageName: 'फूल आने का चरण'
+      harvestTime: 'कटाई का समय',
+      healthStatus: 'स्वास्थ्य स्थिति',
+      recommendations: 'सिफारिशें',
+      analysisResults: 'विश्लेषण परिणाम',
+      analyzingCrop: 'फसल डेटा का विश्लेषण किया जा रहा है...',
+      pleaseWait: 'कृपया प्रतीक्षा करें जब तक हम आपकी तस्वीर संसाधित करते हैं',
+      noData: 'कोई डेटा उपलब्ध नहीं',
+      uploadPromptDetails: 'फसल विवरण देखने के लिए एक तस्वीर अपलोड करें और विश्लेषण करें',
+      analysisIssue: 'विश्लेषण समस्या',
+      aiPowered: 'AI द्वारा संचालित विश्लेषण • परिणाम अनुमान हैं'
     },
-    ಕನ್ನಡ: {
+    'ಕನ್ನಡ': {
       title: 'ಕೃಷಿ ಮಿತ್ರ',
+      botWelcome: 'ನಮಸ್ಕಾರ! ನಾನು ನಿಮಗೆ ಹೇಗೆ ಸಹಾಯ ಮಾಡಬಹುದು?',
+      botResponse: 'ನಿಮ್ಮ ಭತ್ತದ ಬೆಳೆ ಆರೋಗ್ಯಕರವಾಗಿದೆ. ನಿಯಮಿತವಾಗಿ ನೀರು ಹಾಕಿ ಮತ್ತು ಕೀಟಗಳನ್ನು ಗಮನಿಸಿ.',
       dateWeather: 'ಇಂದಿನ ದಿನಾಂಕ ಮತ್ತು ಹವಾಮಾನ',
       monday: 'ಸೋಮವಾರ',
       sunny: 'ಬಿಸಿಲು',
-      weeklyForecast: 'ವಾರದ ಮುನ್ಸೂಚನೆ:',
+      weeklyForecast: 'ವಾರದ ಮುನ್ಸೂಚನೆ',
+      uploadImage: 'ಸಸ್ಯ/ಮಣ್ಣಿನ ಚಿತ್ರವನ್ನು ಅಪ್‌ಲೋಡ್ ಮಾಡಿ',
+      uploadPrompt: 'ಫೋಟೋ ಅಪ್‌ಲೋಡ್ ಮಾಡಿ',
+      askAI: 'AI ಸಹಾಯಕರನ್ನು ಕೇಳಿ',
+      typePlaceholder: 'ನಿಮ್ಮ ಪ್ರಶ್ನೆಯನ್ನು ಟೈಪ್ ಮಾಡಿ...',
       farmerDetails: 'ರೈತರ ವಿವರಗಳು',
       landArea: 'ಭೂಮಿ ವಿಸ್ತೀರ್ಣ',
-      crop: 'ಬೆಳೆ',
+      crop: 'ಬೆಳೆಯ ಪ್ರಕಾರ',
       growthStage: 'ಬೆಳವಣಿಗೆಯ ಹಂತ',
       marketPrice: 'ಮಾರುಕಟ್ಟೆ ಬೆಲೆ',
       estimatedYield: 'ಅಂದಾಜು ಇಳುವರಿ',
-      harvestIn: 'ಕೊಯ್ಲು ಸಮಯ',
-      uploadImage: 'ಸಸ್ಯ/ಮಣ್ಣಿನ ಚಿತ್ರವನ್ನು ಅಪ್‌ಲೋಡ್ ಮಾಡಿ',
-      remove: 'ತೆಗೆದುಹಾಕಿ',
-      analysisResults: 'ವಿಶ್ಲೇಷಣೆ ಫಲಿತಾಂಶಗಳು:',
-      cropHealthy: '✓ ಬೆಳೆ ಆರೋಗ್ಯಕರವಾಗಿ ಕಾಣುತ್ತದೆ',
-      noPest: '✓ ಯಾವುದೇ ಕೀಟ ರೋಗ ಪತ್ತೆಯಾಗಿಲ್ಲ',
-      nitrogen: '⚠ ಸ್ವಲ್ಪ ಸಾರಜನಕ ಕೊರತೆ - ಯೂರಿಯಾ ಗೊಬ್ಬರ ಶಿಫಾರಸು',
-      chooseGallery: 'ಗ್ಯಾಲರಿಯಿಂದ ಆಯ್ಕೆಮಾಡಿ',
-      takePhoto: 'ಫೋಟೋ ತೆಗೆಯಿರಿ',
-      askAI: 'AI ಸಹಾಯಕರನ್ನು ಕೇಳಿ',
-      typePlaceholder: 'ನಿಮ್ಮ ಪ್ರಶ್ನೆಯನ್ನು ಟೈಪ್ ಮಾಡಿ...',
-      botWelcome: 'ನಮಸ್ಕಾರ! ನಾನು ನಿಮಗೆ ಹೇಗೆ ಸಹಾಯ ಮಾಡಬಹುದು?',
-      botResponse: 'ನಿಮ್ಮ ಭತ್ತದ ಬೆಳೆ ಆರೋಗ್ಯಕರವಾಗಿದೆ. ನಿಯಮಿತವಾಗಿ ನೀರು ಹಾಕಿ ಮತ್ತು ಕೀಟಗಳನ್ನು ಗಮನಿಸಿ.',
-      cropName: 'ಭತ್ತ',
-      stageName: 'ಹೂಬಿಡುವ ಹಂತ'
+      harvestTime: 'ಕೊಯ್ಲು ಸಮಯ',
+      healthStatus: 'ಆರೋಗ್ಯ ಸ್ಥಿತಿ',
+      recommendations: 'ಶಿಫಾರಸುಗಳು',
+      analysisResults: 'ವಿಶ್ಲೇಷಣೆ ಫಲಿತಾಂಶಗಳು',
+      analyzingCrop: 'ಬೆಳೆ ಡೇಟಾವನ್ನು ವಿಶ್ಲೇಷಿಸಲಾಗುತ್ತಿದೆ...',
+      pleaseWait: 'ನಾವು ನಿಮ್ಮ ಚಿತ್ರವನ್ನು ಪ್ರಕ್ರಿಯೆಗೊಳಿಸುವವರೆಗೆ ದಯವಿಟ್ಟು ನಿರೀಕ್ಷಿಸಿ',
+      noData: 'ಯಾವುದೇ ಡೇಟಾ ಲಭ್ಯವಿಲ್ಲ',
+      uploadPromptDetails: 'ಬೆಳೆ ವಿವರಗಳನ್ನು ನೋಡಲು ಚಿತ್ರವನ್ನು ಅಪ್‌ಲೋಡ್ ಮಾಡಿ ಮತ್ತು ವಿಶ್ಲೇಷಿಸಿ',
+      analysisIssue: 'ವಿಶ್ಲೇಷಣೆ ಸಮಸ್ಯೆ',
+      aiPowered: 'AI ನಿಂದ ಚಾಲಿತ ವಿಶ್ಲೇಷಣೆ • ಫಲಿತಾಂಶಗಳು ಅಂದಾಜುಗಳಾಗಿವೆ'
     },
-    मराठी: {
+    'मराठी': {
       title: 'कृषी मित्र',
+      botWelcome: 'नमस्कार! मी तुम्हाला कशी मदत करू शकतो?',
+      botResponse: 'तुमचे तांदूळ पीक निरोगी दिसते. नियमितपणे पाणी द्या आणि किडींवर लक्ष ठेवा.',
       dateWeather: 'आजची तारीख आणि हवामान',
       monday: 'सोमवार',
       sunny: 'सूर्यप्रकाश',
-      weeklyForecast: 'साप्ताहिक अंदाज:',
+      weeklyForecast: 'साप्ताहिक अंदाज',
+      uploadImage: 'वनस्पती/मातीचे चित्र अपलोड करा',
+      uploadPrompt: 'फोटो अपलोड करा',
+      askAI: 'AI सहाय्यक विचारा',
+      typePlaceholder: 'तुमचा प्रश्न टाइप करा...',
       farmerDetails: 'शेतकऱ्याचे तपशील',
       landArea: 'जमिनीचे क्षेत्र',
-      crop: 'पीक',
+      crop: 'पीक प्रकार',
       growthStage: 'वाढीचा टप्पा',
       marketPrice: 'बाजार भाव',
       estimatedYield: 'अंदाजे उत्पन्न',
-      harvestIn: 'कापणीपर्यंत',
-      uploadImage: 'वनस्पती/मातीचे चित्र अपलोड करा',
-      remove: 'काढा',
-      analysisResults: 'विश्लेषण परिणाम:',
-      cropHealthy: '✓ पीक निरोगी दिसते',
-      noPest: '✓ कोणताही कीड रोग आढळला नाही',
-      nitrogen: '⚠ थोडी नायट्रोजनची कमतरता - युरिया खताची शिफारस',
-      chooseGallery: 'गॅलरीमधून निवडा',
-      takePhoto: 'फोटो घ्या',
-      askAI: 'AI सहाय्यक विचारा',
-      typePlaceholder: 'तुमचा प्रश्न टाइप करा...',
-      botWelcome: 'नमस्कार! मी तुम्हाला कशी मदत करू शकतो?',
-      botResponse: 'तुमचे तांदूळ पीक निरोगी दिसते. नियमितपणे पाणी द्या आणि किडींवर लक्ष ठेवा.',
-      cropName: 'तांदूळ',
-      stageName: 'फुलांचा टप्पा'
+      harvestTime: 'कापणीची वेळ',
+      healthStatus: 'आरोग्य स्थिती',
+      recommendations: 'शिफारसी',
+      analysisResults: 'विश्लेषण परिणाम',
+      analyzingCrop: 'पीक डेटाचे विश्लेषण करत आहे...',
+      pleaseWait: 'आम्ही तुमची प्रतिमा प्रक्रिया करत असताना कृपया प्रतीक्षा करा',
+      noData: 'कोणताही डेटा उपलब्ध नाही',
+      uploadPromptDetails: 'पीक तपशील पाहण्यासाठी प्रतिमा अपलोड करा आणि विश्लेषण करा',
+      analysisIssue: 'विश्लेषण समस्या',
+      aiPowered: 'AI द्वारे समर्थित विश्लेषण • परिणाम अंदाज आहेत'
     }
   };
-
+  
   const t = translations[language];
+  const weatherData = {
+
 
   //replace with actual weather data from API
   const [weatherData, setWeatherData] = useState({
@@ -138,6 +151,9 @@ export default function KrishiMitra() {
       { day: 'Thu', temp: 27, icon: Cloud }
     ],
     weekly: 'Moderate rainfall expected mid-week. Good for irrigation.'
+  };
+  const [farmerData, setFarmerData] = useState(null);
+  const [geminiJson, setGeminiJson] = useState(null);
   });
   const [isWeatherLoading, setIsWeatherLoading] = useState(true);
 
@@ -284,7 +300,6 @@ export default function KrishiMitra() {
       setInputMessage('');
     }
   };
-
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -295,12 +310,12 @@ export default function KrishiMitra() {
       reader.readAsDataURL(file);
     }
   };
-
   const handleLanguageSelect = (lang) => {
     setLanguage(lang);
     setShowLangDropdown(false);
     setChatMessages([{ type: 'bot', text: translations[lang].botWelcome }]);
   };
+
 
   const localizedWeatherCondition = (() => {
     const cond = weatherData.today.condition.toLowerCase();
@@ -392,8 +407,7 @@ export default function KrishiMitra() {
                   <button
                     key={lang}
                     onClick={() => handleLanguageSelect(lang)}
-                    className={`w-full text-left px-4 py-2 hover:bg-green-50 ${lang === language ? 'font-bold text-green-700' : 'text-gray-800'
-                      }`}
+                    className={`w-full text-left px-4 py-2 hover:bg-green-50 ${lang === language ? 'font-bold text-green-700' : 'text-gray-800'}`}
                   >
                     {lang}
                   </button>
@@ -464,92 +478,31 @@ export default function KrishiMitra() {
           </div>
         </div>
 
-        {/* Farmer Details Card */}
-        <div className="bg-white rounded-3xl shadow-xl p-6 border-2 border-green-100">
-          <div className="flex items-center gap-2 mb-4">
-            <TrendingUp className="w-6 h-6 text-green-600" />
-            <h2 className="text-xl font-bold text-gray-800">{t.farmerDetails}</h2>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-4 border border-green-200">
-              <p className="text-sm text-gray-600 mb-1">{t.landArea}</p>
-              <p className="text-2xl font-bold text-green-700">{farmerData.landArea}</p>
-            </div>
-            <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-4 border border-blue-200">
-              <p className="text-sm text-gray-600 mb-1">{t.crop}</p>
-              <p className="text-2xl font-bold text-blue-700">{t.cropName}</p>
-            </div>
-            <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-xl p-4 border border-yellow-200">
-              <p className="text-sm text-gray-600 mb-1">{t.growthStage}</p>
-              <p className="text-lg font-bold text-yellow-700">{t.stageName}</p>
-            </div>
-            <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-4 border border-purple-200">
-              <p className="text-sm text-gray-600 mb-1">{t.marketPrice}</p>
-              <p className="text-lg font-bold text-purple-700">{farmerData.marketPrice}</p>
-            </div>
-            <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl p-4 border border-orange-200">
-              <p className="text-sm text-gray-600 mb-1">{t.estimatedYield}</p>
-              <p className="text-lg font-bold text-orange-700">{farmerData.estimatedYield}</p>
-            </div>
-            <div className="bg-gradient-to-br from-red-50 to-red-100 rounded-xl p-4 border border-red-200">
-              <p className="text-sm text-gray-600 mb-1">{t.harvestIn}</p>
-              <p className="text-lg font-bold text-red-700">{farmerData.harvestTime}</p>
-            </div>
-          </div>
-        </div>
-
         {/* Image Upload Card */}
-        <div className="bg-white rounded-3xl shadow-xl p-6 border-2 border-green-100">
-          <h2 className="text-xl font-bold text-gray-800 mb-4">{t.uploadImage}</h2>
+        <ImageUploadCard
+          t={t}
+          language={language}
+          uploadedImage={uploadedImage}
+          setUploadedImage={setUploadedImage}
+          handleImageUpload={handleImageUpload}
+          onGeminiResult={result => {
+            if (result && typeof result === 'object') {
+              setGeminiJson(result);
+              setFarmerData(prev => ({
+                ...prev,
+                ...result,
+                landArea: result.landArea ? result.landArea + ' Acres' : prev?.landArea
+              }));
+            }
+          }}
+          setAnalyzing={setAnalyzing}
+        />
 
-          {uploadedImage ? (
-            <div className="relative">
-              <img src={uploadedImage} alt="Uploaded" className="w-full h-64 object-cover rounded-2xl mb-4" />
-              <button
-                onClick={() => setUploadedImage(null)}
-                className="absolute top-2 right-2 bg-red-500 text-white px-4 py-2 rounded-full font-semibold"
-              >
-                {t.remove}
-              </button>
-              <div className="bg-green-50 rounded-xl p-4 border border-green-200">
-                <p className="font-semibold text-green-800 mb-2">{t.analysisResults}</p>
-                <p className="text-gray-700">{t.cropHealthy}</p>
-                <p className="text-gray-700">{t.noPest}</p>
-                <p className="text-gray-700">{t.nitrogen}</p>
-              </div>
-            </div>
-          ) : (
-            <div className="grid grid-cols-2 gap-4">
-              <label className="cursor-pointer">
-                <input
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={handleImageUpload}
-                />
-                <div className="bg-gradient-to-br from-blue-100 to-blue-200 rounded-2xl p-8 text-center hover:shadow-lg transition-all border-2 border-dashed border-blue-400">
-                  <Upload className="w-12 h-12 mx-auto mb-3 text-blue-600" />
-                  <p className="font-semibold text-blue-800">{t.chooseGallery}</p>
-                </div>
-              </label>
-
-              <label className="cursor-pointer">
-                <input
-                  type="file"
-                  accept="image/*"
-                  capture="environment"
-                  className="hidden"
-                  onChange={handleImageUpload}
-                />
-                <div className="bg-gradient-to-br from-green-100 to-green-200 rounded-2xl p-8 text-center hover:shadow-lg transition-all border-2 border-dashed border-green-400">
-                  <Camera className="w-12 h-12 mx-auto mb-3 text-green-600" />
-                  <p className="font-semibold text-green-800">{t.takePhoto}</p>
-                </div>
-              </label>
-            </div>
-          )}
-        </div>
+        {/* Farmer Details Card: always show, but with state */}
+        {/* Show FarmerDetailsCard only after Gemini reply */}
+        {farmerData && Object.keys(farmerData).length > 0 && (
+          <FarmerDetailsCard farmerData={farmerData} analyzing={analyzing} t={t} />
+        )}
 
         {/* Chatbot Card */}
         <div className="bg-white rounded-3xl shadow-xl p-6 border-2 border-green-100">
