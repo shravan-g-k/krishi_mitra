@@ -13,9 +13,7 @@ export default function KrishiMitra() {
   const [showLangDropdown, setShowLangDropdown] = useState(false);
   const [analyzing, setAnalyzing] = useState(false);
   const languages = ['English', 'हिन्दी', 'ಕನ್ನಡ', 'मराठी'];
-  
-  // Add translations object
-  
+    
   // Add translations object
   const translations = {
     'English': {

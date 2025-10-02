@@ -1,6 +1,6 @@
 // Import the Gemini SDK
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import GEMINI_API_KEY from '../secret';
+import {GEMINI_API_KEY} from './secrets';
 
 /**
  * Calls the Gemini API with a given prompt and returns the response using the official SDK.
