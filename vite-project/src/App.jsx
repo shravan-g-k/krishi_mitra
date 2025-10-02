@@ -1,14 +1,12 @@
-import React, { useState } from 'react';
-import { Cloud, Sun, CloudRain, Wind, Send, Mic, Globe, Leaf, Calendar, MapPin } from 'lucide-react';
 import FarmerDetailsCard from './FarmerDetailsCard';
 import ImageUploadCard from './ImageUploadCard';
 
 import React, { useState, useEffect } from 'react';
 import { Cloud, Sun, CloudRain, Wind, Upload, Camera, Send, Mic, Globe, Leaf, TrendingUp, Calendar, MapPin } from 'lucide-react';
 import { WEATHER_API } from './secret';
+
 export default function KrishiMitra() {
-  const [language, setLanguage] 
-  useState('English');
+  const [language, setLanguage] = useState('English');
   const [chatMessages, setChatMessages] = useState([
     { type: 'bot', text: 'Hello! How can I help you today?' }
   ]);
@@ -139,7 +137,6 @@ export default function KrishiMitra() {
   };
   
   const t = translations[language];
-  const weatherData = {
 
 
   //replace with actual weather data from API
@@ -151,10 +148,10 @@ export default function KrishiMitra() {
       { day: 'Thu', temp: 27, icon: Cloud }
     ],
     weekly: 'Moderate rainfall expected mid-week. Good for irrigation.'
-  };
+  });
   const [farmerData, setFarmerData] = useState(null);
   const [geminiJson, setGeminiJson] = useState(null);
-  });
+  
   const [isWeatherLoading, setIsWeatherLoading] = useState(true);
 
   useEffect(() => {
@@ -282,14 +279,6 @@ export default function KrishiMitra() {
     fetchWeatherData();
   }, []);
 
-  const farmerData = {
-    landArea: '2.5 Acres',
-    crop: 'Rice (Paddy)',
-    stage: 'Flowering Stage',
-    marketPrice: '₹2,150/Quintal',
-    estimatedYield: '12 Quintal/Acre',
-    harvestTime: '45 Days'
-  };
 
   const handleSendMessage = () => {
     if (inputMessage.trim()) {
