@@ -1,9 +1,11 @@
 import FarmerDetailsCard from './FarmerDetailsCard';
 import ImageUploadCard from './ImageUploadCard';
+import ReactMarkdown from "react-markdown";
 
 import React, { useState, useEffect } from 'react';
 import { Cloud, Sun, CloudRain, Wind, Upload, Camera, Send, Mic, Globe, Leaf, TrendingUp, Calendar, MapPin } from 'lucide-react';
-import { WEATHER_API } from './secret';
+import { WEATHER_API } from './secrets';
+import { sendToGemini } from './ai';
 
 export default function KrishiMitra() {
   const [language, setLanguage] = useState('English');
@@ -280,12 +282,12 @@ export default function KrishiMitra() {
   }, []);
 
 
-  const handleSendMessage = () => {
+  const handleSendMessage = async () => {
     if (inputMessage.trim()) {
-      setChatMessages([...chatMessages,
-      { type: 'user', text: inputMessage },
-      { type: 'bot', text: t.botResponse }
-      ]);
+      setChatMessages([...chatMessages, { type: 'user', text: inputMessage }]);
+      const aiResponce = await sendToGemini(inputMessage);
+      setChatMessages((prev) => [...prev, { type: 'bot', text: aiResponce }])
+
       setInputMessage('');
     }
   };
@@ -504,7 +506,7 @@ export default function KrishiMitra() {
                   ? 'bg-green-600 text-white'
                   : 'bg-white border-2 border-green-200 text-gray-800'
                   }`}>
-                  {msg.text}
+                  <ReactMarkdown>{msg.text}</ReactMarkdown> 
                 </div>
               </div>
             ))}
