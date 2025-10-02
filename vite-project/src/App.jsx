@@ -15,6 +15,8 @@ export default function KrishiMitra() {
   const languages = ['English', 'हिन्दी', 'ಕನ್ನಡ', 'मराठी'];
   
   // Add translations object
+  
+  // Add translations object
   const translations = {
     'English': {
       title: 'KrishiMitra',
@@ -27,7 +29,110 @@ export default function KrishiMitra() {
       uploadImage: 'Upload Image',
       uploadPrompt: 'Upload a photo',
       askAI: 'Ask AI Assistant',
-      typePlaceholder: 'Type your message...'
+      typePlaceholder: 'Type your message...',
+      farmerDetails: 'Farmer Details',
+      landArea: 'Land Area',
+      crop: 'Crop Type',
+      growthStage: 'Growth Stage',
+      marketPrice: 'Market Price',
+      estimatedYield: 'Estimated Yield',
+      harvestTime: 'Harvest Time',
+      healthStatus: 'Health Status',
+      recommendations: 'Recommendations',
+      analysisResults: 'Analysis Results',
+      analyzingCrop: 'Analyzing crop data...',
+      pleaseWait: 'Please wait while we process your image',
+      noData: 'No Data Available',
+      uploadPromptDetails: 'Upload and analyze an image to see crop details',
+      analysisIssue: 'Analysis Issue',
+      aiPowered: 'Analysis powered by AI • Results are estimates'
+    },
+    'हिन्दी': {
+      title: 'कृषि मित्र',
+      botWelcome: 'नमस्ते! मैं आपकी कैसे मदद कर सकता हूँ?',
+      botResponse: 'आपके धान की फसल स्वस्थ दिख रही है। नियमित रूप से पानी दें और कीटों पर नज़र रखें।',
+      dateWeather: 'आज की तारीख और मौसम',
+      monday: 'सोमवार',
+      sunny: 'धूप',
+      weeklyForecast: 'साप्ताहिक पूर्वानुमान',
+      uploadImage: 'पौधे/मिट्टी की तस्वीर अपलोड करें',
+      uploadPrompt: 'फोटो अपलोड करें',
+      askAI: 'AI सहायक से पूछें',
+      typePlaceholder: 'अपना सवाल टाइप करें...',
+      farmerDetails: 'किसान का विवरण',
+      landArea: 'भूमि क्षेत्र',
+      crop: 'फसल का प्रकार',
+      growthStage: 'वृद्धि चरण',
+      marketPrice: 'बाज़ार मूल्य',
+      estimatedYield: 'अनुमानित उपज',
+      harvestTime: 'कटाई का समय',
+      healthStatus: 'स्वास्थ्य स्थिति',
+      recommendations: 'सिफारिशें',
+      analysisResults: 'विश्लेषण परिणाम',
+      analyzingCrop: 'फसल डेटा का विश्लेषण किया जा रहा है...',
+      pleaseWait: 'कृपया प्रतीक्षा करें जब तक हम आपकी तस्वीर संसाधित करते हैं',
+      noData: 'कोई डेटा उपलब्ध नहीं',
+      uploadPromptDetails: 'फसल विवरण देखने के लिए एक तस्वीर अपलोड करें और विश्लेषण करें',
+      analysisIssue: 'विश्लेषण समस्या',
+      aiPowered: 'AI द्वारा संचालित विश्लेषण • परिणाम अनुमान हैं'
+    },
+    'ಕನ್ನಡ': {
+      title: 'ಕೃಷಿ ಮಿತ್ರ',
+      botWelcome: 'ನಮಸ್ಕಾರ! ನಾನು ನಿಮಗೆ ಹೇಗೆ ಸಹಾಯ ಮಾಡಬಹುದು?',
+      botResponse: 'ನಿಮ್ಮ ಭತ್ತದ ಬೆಳೆ ಆರೋಗ್ಯಕರವಾಗಿದೆ. ನಿಯಮಿತವಾಗಿ ನೀರು ಹಾಕಿ ಮತ್ತು ಕೀಟಗಳನ್ನು ಗಮನಿಸಿ.',
+      dateWeather: 'ಇಂದಿನ ದಿನಾಂಕ ಮತ್ತು ಹವಾಮಾನ',
+      monday: 'ಸೋಮವಾರ',
+      sunny: 'ಬಿಸಿಲು',
+      weeklyForecast: 'ವಾರದ ಮುನ್ಸೂಚನೆ',
+      uploadImage: 'ಸಸ್ಯ/ಮಣ್ಣಿನ ಚಿತ್ರವನ್ನು ಅಪ್‌ಲೋಡ್ ಮಾಡಿ',
+      uploadPrompt: 'ಫೋಟೋ ಅಪ್‌ಲೋಡ್ ಮಾಡಿ',
+      askAI: 'AI ಸಹಾಯಕರನ್ನು ಕೇಳಿ',
+      typePlaceholder: 'ನಿಮ್ಮ ಪ್ರಶ್ನೆಯನ್ನು ಟೈಪ್ ಮಾಡಿ...',
+      farmerDetails: 'ರೈತರ ವಿವರಗಳು',
+      landArea: 'ಭೂಮಿ ವಿಸ್ತೀರ್ಣ',
+      crop: 'ಬೆಳೆಯ ಪ್ರಕಾರ',
+      growthStage: 'ಬೆಳವಣಿಗೆಯ ಹಂತ',
+      marketPrice: 'ಮಾರುಕಟ್ಟೆ ಬೆಲೆ',
+      estimatedYield: 'ಅಂದಾಜು ಇಳುವರಿ',
+      harvestTime: 'ಕೊಯ್ಲು ಸಮಯ',
+      healthStatus: 'ಆರೋಗ್ಯ ಸ್ಥಿತಿ',
+      recommendations: 'ಶಿಫಾರಸುಗಳು',
+      analysisResults: 'ವಿಶ್ಲೇಷಣೆ ಫಲಿತಾಂಶಗಳು',
+      analyzingCrop: 'ಬೆಳೆ ಡೇಟಾವನ್ನು ವಿಶ್ಲೇಷಿಸಲಾಗುತ್ತಿದೆ...',
+      pleaseWait: 'ನಾವು ನಿಮ್ಮ ಚಿತ್ರವನ್ನು ಪ್ರಕ್ರಿಯೆಗೊಳಿಸುವವರೆಗೆ ದಯವಿಟ್ಟು ನಿರೀಕ್ಷಿಸಿ',
+      noData: 'ಯಾವುದೇ ಡೇಟಾ ಲಭ್ಯವಿಲ್ಲ',
+      uploadPromptDetails: 'ಬೆಳೆ ವಿವರಗಳನ್ನು ನೋಡಲು ಚಿತ್ರವನ್ನು ಅಪ್‌ಲೋಡ್ ಮಾಡಿ ಮತ್ತು ವಿಶ್ಲೇಷಿಸಿ',
+      analysisIssue: 'ವಿಶ್ಲೇಷಣೆ ಸಮಸ್ಯೆ',
+      aiPowered: 'AI ನಿಂದ ಚಾಲಿತ ವಿಶ್ಲೇಷಣೆ • ಫಲಿತಾಂಶಗಳು ಅಂದಾಜುಗಳಾಗಿವೆ'
+    },
+    'मराठी': {
+      title: 'कृषी मित्र',
+      botWelcome: 'नमस्कार! मी तुम्हाला कशी मदत करू शकतो?',
+      botResponse: 'तुमचे तांदूळ पीक निरोगी दिसते. नियमितपणे पाणी द्या आणि किडींवर लक्ष ठेवा.',
+      dateWeather: 'आजची तारीख आणि हवामान',
+      monday: 'सोमवार',
+      sunny: 'सूर्यप्रकाश',
+      weeklyForecast: 'साप्ताहिक अंदाज',
+      uploadImage: 'वनस्पती/मातीचे चित्र अपलोड करा',
+      uploadPrompt: 'फोटो अपलोड करा',
+      askAI: 'AI सहाय्यक विचारा',
+      typePlaceholder: 'तुमचा प्रश्न टाइप करा...',
+      farmerDetails: 'शेतकऱ्याचे तपशील',
+      landArea: 'जमिनीचे क्षेत्र',
+      crop: 'पीक प्रकार',
+      growthStage: 'वाढीचा टप्पा',
+      marketPrice: 'बाजार भाव',
+      estimatedYield: 'अंदाजे उत्पन्न',
+      harvestTime: 'कापणीची वेळ',
+      healthStatus: 'आरोग्य स्थिती',
+      recommendations: 'शिफारसी',
+      analysisResults: 'विश्लेषण परिणाम',
+      analyzingCrop: 'पीक डेटाचे विश्लेषण करत आहे...',
+      pleaseWait: 'आम्ही तुमची प्रतिमा प्रक्रिया करत असताना कृपया प्रतीक्षा करा',
+      noData: 'कोणताही डेटा उपलब्ध नाही',
+      uploadPromptDetails: 'पीक तपशील पाहण्यासाठी प्रतिमा अपलोड करा आणि विश्लेषण करा',
+      analysisIssue: 'विश्लेषण समस्या',
+      aiPowered: 'AI द्वारे समर्थित विश्लेषण • परिणाम अंदाज आहेत'
     }
   };
   
@@ -145,6 +250,7 @@ export default function KrishiMitra() {
         {/* Image Upload Card */}
         <ImageUploadCard
           t={t}
+          language={language}
           uploadedImage={uploadedImage}
           setUploadedImage={setUploadedImage}
           handleImageUpload={handleImageUpload}
@@ -164,7 +270,7 @@ export default function KrishiMitra() {
         {/* Farmer Details Card: always show, but with state */}
         {/* Show FarmerDetailsCard only after Gemini reply */}
         {farmerData && Object.keys(farmerData).length > 0 && (
-          <FarmerDetailsCard farmerData={farmerData} analyzing={analyzing} />
+          <FarmerDetailsCard farmerData={farmerData} analyzing={analyzing} t={t} />
         )}
 
         {/* Chatbot Card */}

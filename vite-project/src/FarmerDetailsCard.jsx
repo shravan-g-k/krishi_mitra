@@ -1,17 +1,17 @@
 import React from 'react';
 import { Leaf, TrendingUp, Calendar, DollarSign, Scale, Heart, CheckCircle, AlertTriangle } from 'lucide-react';
 
-export default function FarmerDetailsCard({ farmerData, analyzing }) {
+export default function FarmerDetailsCard({ farmerData, analyzing, t }) {
   // Map field keys to display labels and icons
   const fieldConfig = {
-    landArea: { label: 'Land Area', icon: Scale, color: 'blue' },
-    crop: { label: 'Crop Type', icon: Leaf, color: 'green' },
-    growthStage: { label: 'Growth Stage', icon: TrendingUp, color: 'purple' },
-    marketPrice: { label: 'Market Price', icon: DollarSign, color: 'orange' },
-    estimatedYield: { label: 'Est. Yield', icon: Scale, color: 'indigo' },
-    harvestTime: { label: 'Harvest Time', icon: Calendar, color: 'red' },
-    healthStatus: { label: 'Health Status', icon: Heart, color: 'pink' },
-    recommendations: { label: 'Recommendations', icon: CheckCircle, color: 'teal' }
+    landArea: { label: t?.landArea || 'Land Area', icon: Scale, color: 'blue' },
+    crop: { label: t?.crop || 'Crop Type', icon: Leaf, color: 'green' },
+    growthStage: { label: t?.growthStage || 'Growth Stage', icon: TrendingUp, color: 'purple' },
+    marketPrice: { label: t?.marketPrice || 'Market Price', icon: DollarSign, color: 'orange' },
+    estimatedYield: { label: t?.estimatedYield || 'Est. Yield', icon: Scale, color: 'indigo' },
+    harvestTime: { label: t?.harvestTime || 'Harvest Time', icon: Calendar, color: 'red' },
+    healthStatus: { label: t?.healthStatus || 'Health Status', icon: Heart, color: 'pink' },
+    recommendations: { label: t?.recommendations || 'Recommendations', icon: CheckCircle, color: 'teal' }
   };
 
   const getColorClasses = (color) => {
@@ -34,7 +34,7 @@ export default function FarmerDetailsCard({ farmerData, analyzing }) {
     // Special formatting for specific fields
     if (key === 'healthStatus') {
       const status = value.toLowerCase();
-      if (status.includes('healthy') || status.includes('good')) {
+      if (status.includes('healthy') || status.includes('good') || status.includes('स्वस्थ') || status.includes('ಆರೋಗ್ಯಕರ') || status.includes('निरोगी')) {
         return (
           <span className="flex items-center gap-1 text-green-700 font-semibold">
             <CheckCircle className="w-4 h-4" />
@@ -58,7 +58,7 @@ export default function FarmerDetailsCard({ farmerData, analyzing }) {
     <div className="bg-white rounded-3xl shadow-xl p-6 border-2 border-green-100">
       <div className="flex items-center gap-2 mb-4">
         <Leaf className="w-7 h-7 text-green-600" />
-        <h2 className="text-2xl font-bold text-gray-800">Analysis Results</h2>
+        <h2 className="text-2xl font-bold text-gray-800">{t?.analysisResults || 'Analysis Results'}</h2>
       </div>
 
       {analyzing ? (
@@ -67,16 +67,16 @@ export default function FarmerDetailsCard({ farmerData, analyzing }) {
             <div className="absolute top-0 left-0 w-full h-full border-4 border-green-200 rounded-full"></div>
             <div className="absolute top-0 left-0 w-full h-full border-4 border-green-600 rounded-full border-t-transparent animate-spin"></div>
           </div>
-          <p className="text-green-700 font-semibold text-lg">Analyzing crop data...</p>
-          <p className="text-green-600 text-sm mt-2">Please wait while we process your image</p>
+          <p className="text-green-700 font-semibold text-lg">{t?.analyzingCrop || 'Analyzing crop data...'}</p>
+          <p className="text-green-600 text-sm mt-2">{t?.pleaseWait || 'Please wait while we process your image'}</p>
         </div>
       ) : !farmerData || Object.keys(farmerData).length === 0 ? (
         <div className="bg-gray-50 rounded-2xl p-8 text-center border-2 border-gray-200">
           <div className="w-16 h-16 mx-auto mb-4 bg-gray-200 rounded-full flex items-center justify-center">
             <Leaf className="w-8 h-8 text-gray-400" />
           </div>
-          <p className="text-gray-600 font-semibold text-lg mb-2">No Data Available</p>
-          <p className="text-gray-500 text-sm">Upload and analyze an image to see crop details</p>
+          <p className="text-gray-600 font-semibold text-lg mb-2">{t?.noData || 'No Data Available'}</p>
+          <p className="text-gray-500 text-sm">{t?.uploadPromptDetails || 'Upload and analyze an image to see crop details'}</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -120,7 +120,7 @@ export default function FarmerDetailsCard({ farmerData, analyzing }) {
               <div className="flex items-start gap-2">
                 <AlertTriangle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
                 <div>
-                  <p className="font-semibold text-red-800 mb-1">Analysis Issue</p>
+                  <p className="font-semibold text-red-800 mb-1">{t?.analysisIssue || 'Analysis Issue'}</p>
                   <p className="text-red-700 text-sm">{farmerData.error}</p>
                 </div>
               </div>
@@ -130,7 +130,7 @@ export default function FarmerDetailsCard({ farmerData, analyzing }) {
           {/* Summary footer */}
           <div className="mt-6 pt-4 border-t-2 border-gray-200 col-span-1 md:col-span-2">
             <p className="text-sm text-gray-600 text-center">
-              💡 Analysis powered by AI • Results are estimates
+              💡 {t?.aiPowered || 'Analysis powered by AI • Results are estimates'}
             </p>
           </div>
         </div>

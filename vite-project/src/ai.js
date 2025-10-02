@@ -46,10 +46,11 @@ export async function callGemini(prompt, base64Image = null) {
  * Analyzes an image file and area using Gemini, with timeout and result parsing.
  * @param {File} image - The image file to analyze.
  * @param {string|number} area - The area value (optional).
+ * @param {string} language - The selected language for response.
  * @param {number} maxTime - Timeout in seconds (default 60).
  * @returns {Promise<{result: object|null, error: string|null}>}
  */
-export async function analyzeImageWithGemini(image, area, maxTime = 60) {
+export async function analyzeImageWithGemini(image, area, language = 'English', maxTime = 60) {
   if (!image) return { result: null, error: "No image provided" };
   
   // Convert image file to base64
@@ -60,33 +61,46 @@ export async function analyzeImageWithGemini(image, area, maxTime = 60) {
     reader.readAsDataURL(file);
   });
 
+  // Language mapping for Gemini
+  const languageInstructions = {
+    'English': 'Respond in English',
+    'हिन्दी': 'Respond in Hindi (Devanagari script)',
+    'ಕನ್ನಡ': 'Respond in Kannada language',
+    'मराठी': 'Respond in Marathi (Devanagari script)'
+  };
+
   let timeoutId;
   
   try {
     const base64Image = await toBase64(image);
     
-    // Enhanced prompt for better accuracy
-    let prompt = `You are an expert agricultural AI assistant. Analyze this farm/crop image carefully and provide detailed farming information.
+    // Enhanced prompt for better accuracy with language support
+    let prompt = `You are an expert agricultural AI assistant for Indian farmers. Analyze this farm/crop image carefully and provide detailed farming information.
 
-IMPORTANT: Respond ONLY with a valid JSON object. No markdown, no code blocks, no extra text.
+IMPORTANT INSTRUCTIONS:
+1. ${languageInstructions[language] || 'Respond in English'}
+2. Use Indian measurements: kg (kilograms), quintal, tons, acres, hectares
+3. Use Indian currency: ₹ (Rupees) for all prices
+4. Provide prices based on Indian agricultural market rates
+5. Respond ONLY with a valid JSON object. No markdown, no code blocks, no extra text.
 
-Required JSON format:
+Required JSON format (field names in English, but values in ${language}):
 {
-  "landArea": "number with unit (e.g., '5 acres' or use provided area)",
-  "crop": "specific crop name identified in image",
-  "growthStage": "current growth stage (e.g., 'Vegetative', 'Flowering', 'Mature')",
-  "marketPrice": "estimated market price with currency (e.g., '₹5,000/quintal')",
-  "estimatedYield": "estimated yield based on crop and stage (e.g., '3 tons/acre')",
-  "harvestTime": "estimated time to harvest (e.g., '45 days', 'Ready to harvest')",
-  "healthStatus": "crop health status (e.g., 'Healthy', 'Needs attention')",
-  "recommendations": "brief farming recommendations (1-2 sentences)"
+  "landArea": "number with unit in ${language} (e.g., '5 एकड़' for Hindi or '5 ಎಕರೆ' for Kannada or use provided area)",
+  "crop": "specific crop name identified in image in ${language}",
+  "growthStage": "current growth stage in ${language} (e.g., 'वानस्पतिक' for Hindi, 'ಸಸ್ಯಕ' for Kannada)",
+  "marketPrice": "estimated Indian market price with ₹ in ${language} (e.g., '₹5,000/क्विंटल' for Hindi)",
+  "estimatedYield": "estimated yield in Indian units in ${language} (e.g., '3 टन/एकड़' for Hindi, '3 ಟನ್/ಎಕರೆ' for Kannada)",
+  "harvestTime": "estimated time to harvest in ${language} (e.g., '45 दिन' for Hindi, '45 ದಿನಗಳು' for Kannada)",
+  "healthStatus": "crop health status in ${language} (e.g., 'स्वस्थ' for Hindi, 'ಆರೋಗ್ಯಕರ' for Kannada)",
+  "recommendations": "brief farming recommendations in ${language} (1-2 sentences)"
 }`;
 
     if (area && area.trim() !== '') {
-      prompt += `\n\nProvided land area: ${area} acres. Use this for landArea field.`;
+      prompt += `\n\nProvided land area: ${area} acres. Use this for landArea field and convert to ${language}.`;
     }
 
-    prompt += `\n\nAnalyze the image and respond with the JSON object only.`;
+    prompt += `\n\nAnalyze the image and respond with the JSON object only. Remember: ALL values must be in ${language}, use Indian measurements (kg, quintal, tons, acres) and Indian currency (₹).`;
 
     // Create timeout promise
     const timeoutPromise = new Promise((_, reject) => {

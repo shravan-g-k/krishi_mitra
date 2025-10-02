@@ -5,6 +5,7 @@ import { analyzeImageWithGemini, isGeminiConfigured } from './ai';
 
 export default function ImageUploadCard({ 
   t, 
+  language,
   uploadedImage, 
   setUploadedImage, 
   handleImageUpload, 
@@ -123,7 +124,7 @@ export default function ImageUploadCard({
     setTimeout(() => setAnalysisProgress('Calculating estimates...'), 2000);
 
     try {
-      const { result, error } = await analyzeImageWithGemini(imageFile, area, 60);
+      const { result, error } = await analyzeImageWithGemini(imageFile, area, language, 60);
       
       if (error) {
         setGeminiError(error);
