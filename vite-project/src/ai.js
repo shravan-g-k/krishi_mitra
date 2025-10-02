@@ -173,7 +173,19 @@ Required JSON format (field names in English, but values in ${language}):
     };
   }
 }
-
+export async function sendToGemini(userInput,language) {
+  const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
+  const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash-exp" });
+  try {
+    const prompt=`Answer directly in ${language}Format the answer using Markdown with headings, bullet points, and bold where appropriate. Use short paragraphs. Query:: ${userInput}`;
+    const result = await model.generateContent(prompt);
+    const response = result.response;
+    return response.text();
+  } catch (error) {
+    console.error("Error sending to Gemini:", error);
+    return "Error: Unable to get response.";
+  }
+}
 /**
  * Helper function to validate Gemini API key
  * @returns {boolean}
