@@ -29,3 +29,4 @@ secrets.js
 *.njsproj
 *.sln
 *.sw?
+vite_project/node_modules/
