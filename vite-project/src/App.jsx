@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Cloud, Sun, CloudRain, Wind, Upload, Camera, Send, Mic, Globe, Leaf, TrendingUp, Calendar, MapPin } from 'lucide-react';
-
+import { WEATHER_API } from './secret';
 export default function KrishiMitra() {
   const [language, setLanguage] = useState('English');
   const [chatMessages, setChatMessages] = useState([
@@ -130,7 +130,7 @@ export default function KrishiMitra() {
   const t = translations[language];
 
   //replace with actual weather data from API
-  const weatherData = {
+  const [weatherData, setWeatherData] = useState({
     today: { temp: 28, condition: 'Sunny', icon: Sun },
     forecast: [
       { day: 'Tue', temp: 30, icon: Sun },
@@ -138,7 +138,133 @@ export default function KrishiMitra() {
       { day: 'Thu', temp: 27, icon: Cloud }
     ],
     weekly: 'Moderate rainfall expected mid-week. Good for irrigation.'
-  };
+  });
+  const [isWeatherLoading, setIsWeatherLoading] = useState(true);
+
+  useEffect(() => {
+    const getUserLocation = () => {
+      return new Promise((resolve, reject) => {
+        if (!navigator.geolocation) {
+          reject(new Error('Geolocation is not supported by this browser'));
+          return;
+        }
+
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            resolve({
+              lat: position.coords.latitude,
+              lon: position.coords.longitude
+            });
+          },
+          (error) => {
+            reject(new Error(`Location access denied: ${error.message}`));
+          },
+          {
+            enableHighAccuracy: true,
+            timeout: 10000,
+            maximumAge: 300000 // 5 minutes
+          }
+        );
+      });
+    };
+
+    const fetchWeatherData = async () => {
+      const API_KEY = WEATHER_API;
+
+      try {
+        // Get user's current location
+        console.log('Requesting location permission...');
+        const location = await getUserLocation();
+        console.log('Location obtained:', location);
+
+        const { lat, lon } = location;
+
+        // Get current weather
+        const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=metric`);
+
+        if (!response.ok) {
+          throw new Error(`Weather API error: ${response.status} ${response.statusText}`);
+        }
+
+        const currentData = await response.json();
+
+        // Get 5-day forecast
+        const forecastResponse = await fetch(`https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=metric`);
+
+        if (!forecastResponse.ok) {
+          throw new Error(`Forecast API error: ${forecastResponse.status} ${forecastResponse.statusText}`);
+        }
+
+        const forecastData = await forecastResponse.json();
+
+        const getIcon = (weather) => {
+          switch (weather.toLowerCase()) {
+            case 'clear':
+            case 'sunny':
+              return Sun;
+            case 'rain':
+            case 'drizzle':
+            case 'shower':
+            case 'thunderstorm':
+              return CloudRain;
+            case 'clouds':
+            case 'cloudy':
+            case 'overcast':
+            case 'mist':
+            case 'fog':
+            case 'haze':
+              return Cloud;
+            case 'snow':
+            case 'sleet':
+              return Cloud; // Using Cloud for snow since no snow icon available
+            default:
+              return Sun;
+          }
+        };
+
+        const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+        // Get next 3 days forecast (skip today, get next 3 unique days)
+        const dailyForecasts = [];
+        const processedDates = new Set();
+
+        for (let i = 0; i < forecastData.list.length && dailyForecasts.length < 3; i++) {
+          const forecast = forecastData.list[i];
+          const date = new Date(forecast.dt * 1000);
+          const dateKey = date.toDateString();
+
+          // Skip if we already processed this date, and skip today
+          if (!processedDates.has(dateKey) && date.getDate() !== new Date().getDate()) {
+            processedDates.add(dateKey);
+            dailyForecasts.push({
+              day: days[date.getDay()],
+              temp: Math.round(forecast.main.temp),
+              icon: getIcon(forecast.weather[0].main)
+            });
+          }
+        }
+
+        console.log('Weather data for location:', currentData.name);
+        setWeatherData({
+          today: {
+            temp: Math.round(currentData.main.temp),
+            condition: currentData.weather[0].main,
+            icon: getIcon(currentData.weather[0].main)
+          },
+          forecast: dailyForecasts,
+          weekly: `${currentData.weather[0].description}. Humidity: ${currentData.main.humidity}%. Location: ${currentData.name}`
+        });
+      } catch (error) {
+        console.error('Weather API error:', error);
+        console.log('Using default weather data due to error:', error.message);
+        // Keep default data on error - could be location denied or API error
+      } finally {
+        setIsWeatherLoading(false);
+      }
+    };
+
+    fetchWeatherData();
+  }, []);
 
   const farmerData = {
     landArea: '2.5 Acres',
@@ -175,6 +301,73 @@ export default function KrishiMitra() {
     setShowLangDropdown(false);
     setChatMessages([{ type: 'bot', text: translations[lang].botWelcome }]);
   };
+
+  const localizedWeatherCondition = (() => {
+    const cond = weatherData.today.condition.toLowerCase();
+    if (language === 'English') return weatherData.today.condition;
+    if (language === 'हिन्दी') {
+      if (cond === 'clear') return 'धूप';
+      if (cond === 'clouds') return 'बादल';
+      if (cond === 'rain') return 'बारिश';
+      return weatherData.today.condition;
+    }
+    if (language === 'ಕನ್ನಡ') {
+      if (cond === 'clear') return 'ಬಿಸಿಲು';
+      if (cond === 'clouds') return 'ಮೋಡಗಳು';
+      if (cond === 'rain') return 'ಮಳೆ';
+      return weatherData.today.condition;
+    }
+    if (language === 'मराठी') {
+      if (cond === 'clear') return 'सूर्यप्रकाश';
+      if (cond === 'clouds') return 'ढग';
+      if (cond === 'rain') return 'पाऊस';
+      return weatherData.today.condition;
+    }
+    return weatherData.today.condition;
+  })();
+
+  const localizedHumidity = (() => {
+    const humidityMatch = weatherData.weekly.match(/Humidity: (\d+)%/);
+    const humidity = humidityMatch ? humidityMatch[1] : '';
+    if (language === 'English') return `Humidity: ${humidity}%`;
+    if (language === 'हिन्दी') return `आर्द्रता: ${humidity}%`;
+    if (language === 'ಕನ್ನಡ') return `ಆದ್ರತೆ: ${humidity}%`;
+    if (language === 'मराठी') return `आर्द्रता: ${humidity}%`;
+    return `Humidity: ${humidity}%`;
+  })();
+
+  const localizedWeekly = (() => {
+    let desc = weatherData.weekly;
+    desc = desc.replace(/Humidity: (\d+)%/, localizedHumidity);
+    if (language === 'English') return desc;
+    if (language === 'हिन्दी') {
+      desc = desc.replace('Location:', 'स्थान:');
+      desc = desc.replace('clear sky', 'स्वच्छ आकाश');
+      desc = desc.replace('clouds', 'बादल');
+      desc = desc.replace('rain', 'बारिश');
+      return desc;
+    }
+    if (language === 'ಕನ್ನಡ') {
+      desc = desc.replace('Location:', 'ಸ್ಥಳ:');
+      desc = desc.replace('clear sky', 'ಸ್ವಚ್ಛ ಆಕಾಶ');
+      desc = desc.replace('clouds', 'ಮೋಡಗಳು');
+      desc = desc.replace('rain', 'ಮಳೆ');
+      return desc;
+    }
+    if (language === 'मराठी') {
+      desc = desc.replace('Location:', 'स्थान:');
+      desc = desc.replace('clear sky', 'स्वच्छ आकाश');
+      desc = desc.replace('clouds', 'ढग');
+      desc = desc.replace('rain', 'पाऊस');
+      return desc;
+    }
+    return desc;
+  })();
+
+  const localizedDate = new Date().toLocaleDateString(
+    language === 'English' ? 'en-IN' : language === 'हिन्दी' ? 'hi-IN' : language === 'ಕನ್ನಡ' ? 'kn-IN' : 'mr-IN',
+    { day: 'numeric', month: 'long', year: 'numeric' }
+  );
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-blue-50 to-green-100">
@@ -220,35 +413,54 @@ export default function KrishiMitra() {
           </div>
 
           <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-2xl p-5 mb-4">
-            <div className="flex justify-between items-center">
-              <div>
-                <p className="text-3xl font-bold">29 September 2025</p>
-                <p className="text-lg opacity-90">{t.monday}</p>
+            {isWeatherLoading ? (
+              <div className="flex flex-col items-center justify-center py-8">
+                <div className="w-full bg-blue-400 rounded-full h-2 mb-4">
+                  <div className="bg-white h-2 rounded-full animate-pulse" style={{ width: '60%' }}></div>
+                </div>
+                <p className="text-lg opacity-90">Loading weather data...</p>
               </div>
-              <div className="text-right">
-                <Sun className="w-16 h-16 mb-2 ml-auto" />
-                <p className="text-3xl font-bold">{weatherData.today.temp}°C</p>
-                <p className="opacity-90">{t.sunny}</p>
+            ) : (
+              <div className="flex justify-between items-center">
+                <div>
+                  <p className="text-3xl font-bold">{localizedDate}</p>
+                  <p className="text-lg opacity-90">{t.monday}</p>
+                </div>
+                <div className="text-right">
+                  {React.createElement(weatherData.today.icon, { className: "w-16 h-16 mb-2 ml-auto" })}
+                  <p className="text-3xl font-bold">{weatherData.today.temp}°C</p>
+                  <p className="opacity-90">{localizedWeatherCondition}</p>
+                </div>
               </div>
-            </div>
+            )}
           </div>
 
           <div className="grid grid-cols-3 gap-3 mb-4">
-            {weatherData.forecast.map((day, idx) => {
-              const Icon = day.icon;
-              return (
+            {isWeatherLoading ? (
+              Array.from({ length: 3 }).map((_, idx) => (
                 <div key={idx} className="bg-blue-50 rounded-xl p-3 text-center">
-                  <p className="font-semibold text-gray-700">{day.day}</p>
-                  <Icon className="w-8 h-8 mx-auto my-2 text-blue-600" />
-                  <p className="font-bold text-gray-800">{day.temp}°C</p>
+                  <div className="h-4 bg-gray-300 rounded mb-2 animate-pulse"></div>
+                  <div className="w-8 h-8 bg-gray-300 rounded-full mx-auto my-2 animate-pulse"></div>
+                  <div className="h-4 bg-gray-300 rounded animate-pulse"></div>
                 </div>
-              );
-            })}
+              ))
+            ) : (
+              weatherData.forecast.map((day, idx) => {
+                const Icon = day.icon;
+                return (
+                  <div key={idx} className="bg-blue-50 rounded-xl p-3 text-center">
+                    <p className="font-semibold text-gray-700">{day.day}</p>
+                    <Icon className="w-8 h-8 mx-auto my-2 text-blue-600" />
+                    <p className="font-bold text-gray-800">{day.temp}°C</p>
+                  </div>
+                );
+              })
+            )}
           </div>
 
           <div className="bg-green-50 rounded-xl p-4 border border-green-200">
             <p className="text-sm font-semibold text-green-800">{t.weeklyForecast}</p>
-            <p className="text-gray-700 mt-1">{weatherData.weekly}</p>
+            <p className="text-gray-700 mt-1">{localizedWeekly}</p>
           </div>
         </div>
 
