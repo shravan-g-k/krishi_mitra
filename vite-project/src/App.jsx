@@ -302,6 +302,73 @@ export default function KrishiMitra() {
     setChatMessages([{ type: 'bot', text: translations[lang].botWelcome }]);
   };
 
+  const localizedWeatherCondition = (() => {
+    const cond = weatherData.today.condition.toLowerCase();
+    if (language === 'English') return weatherData.today.condition;
+    if (language === 'हिन्दी') {
+      if (cond === 'clear') return 'धूप';
+      if (cond === 'clouds') return 'बादल';
+      if (cond === 'rain') return 'बारिश';
+      return weatherData.today.condition;
+    }
+    if (language === 'ಕನ್ನಡ') {
+      if (cond === 'clear') return 'ಬಿಸಿಲು';
+      if (cond === 'clouds') return 'ಮೋಡಗಳು';
+      if (cond === 'rain') return 'ಮಳೆ';
+      return weatherData.today.condition;
+    }
+    if (language === 'मराठी') {
+      if (cond === 'clear') return 'सूर्यप्रकाश';
+      if (cond === 'clouds') return 'ढग';
+      if (cond === 'rain') return 'पाऊस';
+      return weatherData.today.condition;
+    }
+    return weatherData.today.condition;
+  })();
+
+  const localizedHumidity = (() => {
+    const humidityMatch = weatherData.weekly.match(/Humidity: (\d+)%/);
+    const humidity = humidityMatch ? humidityMatch[1] : '';
+    if (language === 'English') return `Humidity: ${humidity}%`;
+    if (language === 'हिन्दी') return `आर्द्रता: ${humidity}%`;
+    if (language === 'ಕನ್ನಡ') return `ಆದ್ರತೆ: ${humidity}%`;
+    if (language === 'मराठी') return `आर्द्रता: ${humidity}%`;
+    return `Humidity: ${humidity}%`;
+  })();
+
+  const localizedWeekly = (() => {
+    let desc = weatherData.weekly;
+    desc = desc.replace(/Humidity: (\d+)%/, localizedHumidity);
+    if (language === 'English') return desc;
+    if (language === 'हिन्दी') {
+      desc = desc.replace('Location:', 'स्थान:');
+      desc = desc.replace('clear sky', 'स्वच्छ आकाश');
+      desc = desc.replace('clouds', 'बादल');
+      desc = desc.replace('rain', 'बारिश');
+      return desc;
+    }
+    if (language === 'ಕನ್ನಡ') {
+      desc = desc.replace('Location:', 'ಸ್ಥಳ:');
+      desc = desc.replace('clear sky', 'ಸ್ವಚ್ಛ ಆಕಾಶ');
+      desc = desc.replace('clouds', 'ಮೋಡಗಳು');
+      desc = desc.replace('rain', 'ಮಳೆ');
+      return desc;
+    }
+    if (language === 'मराठी') {
+      desc = desc.replace('Location:', 'स्थान:');
+      desc = desc.replace('clear sky', 'स्वच्छ आकाश');
+      desc = desc.replace('clouds', 'ढग');
+      desc = desc.replace('rain', 'पाऊस');
+      return desc;
+    }
+    return desc;
+  })();
+
+  const localizedDate = new Date().toLocaleDateString(
+    language === 'English' ? 'en-IN' : language === 'हिन्दी' ? 'hi-IN' : language === 'ಕನ್ನಡ' ? 'kn-IN' : 'mr-IN',
+    { day: 'numeric', month: 'long', year: 'numeric' }
+  );
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-blue-50 to-green-100">
       {/* Header */}
@@ -356,13 +423,13 @@ export default function KrishiMitra() {
             ) : (
               <div className="flex justify-between items-center">
                 <div>
-                  <p className="text-3xl font-bold">{new Date().toLocaleDateString(language === 'English' ? 'en-IN' : language === 'हिन्दी' ? 'hi-IN' : language === 'ಕನ್ನಡ' ? 'kn-IN' : 'mr-IN', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
+                  <p className="text-3xl font-bold">{localizedDate}</p>
                   <p className="text-lg opacity-90">{t.monday}</p>
                 </div>
                 <div className="text-right">
                   {React.createElement(weatherData.today.icon, { className: "w-16 h-16 mb-2 ml-auto" })}
                   <p className="text-3xl font-bold">{weatherData.today.temp}°C</p>
-                  <p className="opacity-90">{weatherData.today.condition}</p>
+                  <p className="opacity-90">{localizedWeatherCondition}</p>
                 </div>
               </div>
             )}
@@ -393,7 +460,7 @@ export default function KrishiMitra() {
 
           <div className="bg-green-50 rounded-xl p-4 border border-green-200">
             <p className="text-sm font-semibold text-green-800">{t.weeklyForecast}</p>
-            <p className="text-gray-700 mt-1">{weatherData.weekly}</p>
+            <p className="text-gray-700 mt-1">{localizedWeekly}</p>
           </div>
         </div>
 
